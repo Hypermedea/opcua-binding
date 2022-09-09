@@ -23,16 +23,16 @@ import static org.eclipse.milo.opcua.sdk.client.OpcUaClient.create;
 
 public class OpcUaBinding implements ProtocolBinding {
 
-    public static final String OPCUA_PROTOCOL = "OPC UA";
+    public static final String OPC_UA_PROTOCOL = "OPC UA";
 
-    public static final String OPCUA_SCHEME = "opc.tcp";
+    public static final String OPC_UA_SCHEME = "opc.tcp";
 
     private static OpcUaBinding singleton = new OpcUaBinding();
 
     static {
         // FIXME not called as long as OpcUaBinding isn't mentioned in code
         // use reflection instead? Class.forName(...)
-        ProtocolBindings.registerBinding(OPCUA_SCHEME, singleton);
+        ProtocolBindings.registerBinding(OPC_UA_SCHEME, singleton);
     }
 
     /**
@@ -40,13 +40,13 @@ public class OpcUaBinding implements ProtocolBinding {
      * By reusing the same client, several operations targeting the same OPC UA server
      * will require only a single connection.
      */
-    private OpcUaClient lastClientUsed;
+    private OpcUaClient lastClientUsed = null;
 
-    private OpcUaBinding() {}
+    //private OpcUaBinding() {}
 
     @Override
     public String getProtocol() {
-        return OPCUA_PROTOCOL;
+        return OPC_UA_PROTOCOL;
     }
 
     @Override
@@ -64,10 +64,10 @@ public class OpcUaBinding implements ProtocolBinding {
         try {
             URI uri = new URI(form.getTarget());
             // TODO throw error instead
-            if (!uri.getScheme().equals(OPCUA_SCHEME)) return null;
+            if (!uri.getScheme().equals(OPC_UA_SCHEME)) return null;
 
             OpcUaClient c = createClient(form.getTarget());
-            if (!lastClientUsed.equals(c)) lastClientUsed = c;
+            if (lastClientUsed == null || !lastClientUsed.equals(c)) lastClientUsed = c;
 
             switch (operationType) {
                 case TD.readProperty: return new ReadOperation(form, c);
