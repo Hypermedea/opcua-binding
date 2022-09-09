@@ -31,6 +31,7 @@ public class ReadOperation extends OpcUaOperation {
         try {
             DataValue dv = res.get();
 
+            // FIXME dv may hold a null value
             return new OpcUaResponse(dv);
         } catch (InterruptedException e) {
             throw new IOException(e);

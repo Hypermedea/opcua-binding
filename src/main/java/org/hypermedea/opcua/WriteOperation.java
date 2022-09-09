@@ -30,21 +30,14 @@ public class WriteOperation extends OpcUaOperation {
     @Override
     public Response execute() throws IOException {
         if (dv == null) {
-            // TODO throw exception (insufficient information)
+            throw new IOException("writeProperty operation cannot be executed: no value to send to OPC UA server");
         }
 
         CompletableFuture<StatusCode> res = client.writeValue(nodeId, dv);
 
         try {
             StatusCode opcUaCode = res.get();
-
-            Response.ResponseStatus opCode;
-
-            if (opcUaCode.isGood()) opCode = Response.ResponseStatus.OK;
-            else if (opcUaCode.isBad()) opCode = Response.ResponseStatus.THING_ERROR;
-            else opCode = Response.ResponseStatus.UNKNOWN_ERROR;
-
-            return new OpcUaResponse(opCode);
+            return new OpcUaResponse(opcUaCode);
         } catch (InterruptedException e) {
             throw new IOException(e);
         } catch (ExecutionException e) {

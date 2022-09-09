@@ -1,6 +1,7 @@
 package org.hypermedea.opcua;
 
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
+import ch.unisg.ics.interactions.wot.td.bindings.InvalidFormException;
 import ch.unisg.ics.interactions.wot.td.bindings.Operation;
 import ch.unisg.ics.interactions.wot.td.bindings.Response;
 import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
@@ -18,7 +19,7 @@ abstract public class OpcUaOperation implements Operation {
 
     protected final OpcUaClient client;
 
-    public OpcUaOperation(Form form, OpcUaClient client) {
+    public OpcUaOperation(Form form, OpcUaClient client) throws InvalidFormException {
         this.form = form;
         this.client = client;
 
@@ -28,7 +29,7 @@ abstract public class OpcUaOperation implements Operation {
             String v = (String) kv.get(OPCUA.nodeId);
             nodeId = NodeId.parse(v);
         } else {
-            nodeId = null; // throw error instead?
+            throw new InvalidFormException("The given form does not include any NodeId (mandatory)");
         }
     }
 
