@@ -1,5 +1,4 @@
 plugins {
-    id 'java'
     id 'java-library'
 }
 
@@ -26,13 +25,13 @@ test {
     useJUnitPlatform()
 }
 
-jar {
-    manifest {
-        attributes 'Implementation-Title': 'OPC UA Binding for W3C WoT',
-                'Implementation-Version': version,
-                'Built-By': 'Victor Charpenay'
-    }
-
-    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-    from { configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) } }
-}
+//jar {
+//    manifest {
+//        attributes 'Implementation-Title': 'OPC UA Binding for W3C WoT',
+//                'Implementation-Version': version,
+//                'Built-By': 'Victor Charpenay'
+//    }
+//
+//    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+//    from { configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) } }
+//}
