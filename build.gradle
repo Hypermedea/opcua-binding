@@ -14,7 +14,9 @@ repositories {
 dependencies {
     implementation 'org.eclipse.milo:sdk-client:0.6.8'
 
-    implementation 'com.github.Hypermedea:wot-td-java:1d163b1'
+    // do not export wot-td-java with the library (which should already be included in the end-user application)
+    compileOnly 'com.github.Hypermedea:wot-td-java:1d163b1'
+    testImplementation 'com.github.Hypermedea:wot-td-java:1d163b1'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
