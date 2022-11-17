@@ -1,17 +1,14 @@
 package org.hypermedea.opcua;
 
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
+import ch.unisg.ics.interactions.wot.td.bindings.BaseOperation;
 import ch.unisg.ics.interactions.wot.td.bindings.InvalidFormException;
-import ch.unisg.ics.interactions.wot.td.bindings.Operation;
-import ch.unisg.ics.interactions.wot.td.bindings.Response;
-import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.eclipse.milo.opcua.stack.core.types.builtin.NodeId;
 
-import java.io.IOException;
 import java.util.Map;
 
-abstract public class OpcUaOperation implements Operation {
+abstract public class OpcUaOperation extends BaseOperation {
 
     protected final Form form;
 
@@ -32,11 +29,5 @@ abstract public class OpcUaOperation implements Operation {
             throw new InvalidFormException("The given form does not include any NodeId (mandatory)");
         }
     }
-
-    @Override
-    abstract public void setPayload(DataSchema schema, Object payload);
-
-    @Override
-    abstract public Response execute() throws IOException;
 
 }

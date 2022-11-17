@@ -1,15 +1,14 @@
 package org.hypermedea.opcua;
 
 import ch.unisg.ics.interactions.wot.td.affordances.Form;
-import ch.unisg.ics.interactions.wot.td.bindings.Response;
-import ch.unisg.ics.interactions.wot.td.schemas.DataSchema;
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.enumerated.TimestampsToReturn;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 public class ReadOperation extends OpcUaOperation {
 
@@ -20,24 +19,43 @@ public class ReadOperation extends OpcUaOperation {
     }
 
     @Override
-    public void setPayload(DataSchema schema, Object payload) {
-        // does nothing
+    public void sendRequest() throws IOException {
+        CompletableFuture<DataValue> res = client.readValue(DEFAULT_MAX_AGE, TimestampsToReturn.Both, nodeId);
+
+        res.thenAccept(dv -> {
+            // FIXME dv may hold a null value
+            onResponse(new OpcUaResponse(dv));
+        });
     }
 
     @Override
-    public Response execute() throws IOException {
-        CompletableFuture<DataValue> res = client.readValue(DEFAULT_MAX_AGE, TimestampsToReturn.Both, nodeId);
+    protected void setObjectPayload(Map<String, Object> payload) {
+        // do nothing
+    }
 
-        try {
-            DataValue dv = res.get();
+    @Override
+    protected void setArrayPayload(List<Object> payload) {
+        // do nothing
+    }
 
-            // FIXME dv may hold a null value
-            return new OpcUaResponse(dv);
-        } catch (InterruptedException e) {
-            throw new IOException(e);
-        } catch (ExecutionException e) {
-            throw new IOException(e);
-        }
+    @Override
+    protected void setStringPayload(String payload) {
+        // do nothing
+    }
+
+    @Override
+    protected void setBooleanPayload(Boolean payload) {
+        // do nothing
+    }
+
+    @Override
+    protected void setIntegerPayload(Long payload) {
+        // do nothing
+    }
+
+    @Override
+    protected void setNumberPayload(Double payload) {
+        // do nothing
     }
 
 }

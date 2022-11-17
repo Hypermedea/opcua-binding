@@ -34,10 +34,11 @@ public class OpcUaBindingTest {
                 .build();
 
         Operation op = ProtocolBindings.getBinding(f).bind(f, TD.readProperty);
-        Response res = op.execute();
+        op.sendRequest();
+        Response res = op.getResponse();
 
         assertEquals(Response.ResponseStatus.OK, res.getStatus());
-        assertInstanceOf(Integer.class, res.getPayload());
+        assertInstanceOf(Integer.class, res.getPayload().get());
     }
 
     @Test
@@ -49,7 +50,8 @@ public class OpcUaBindingTest {
 
         Operation op = ProtocolBindings.getBinding(f).bind(f, TD.writeProperty);
         op.setPayload(new IntegerSchema.Builder().build(), 234);
-        Response res = op.execute();
+        op.sendRequest();
+        Response res = op.getResponse();
 
         assertEquals(Response.ResponseStatus.OK, res.getStatus());
     }

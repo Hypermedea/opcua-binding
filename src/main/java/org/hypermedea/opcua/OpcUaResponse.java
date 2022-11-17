@@ -4,10 +4,10 @@ import ch.unisg.ics.interactions.wot.td.affordances.Link;
 import ch.unisg.ics.interactions.wot.td.bindings.Response;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
-import org.eclipse.milo.opcua.stack.core.util.TypeUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Optional;
 
 public class OpcUaResponse implements Response {
 
@@ -31,9 +31,10 @@ public class OpcUaResponse implements Response {
     }
 
     @Override
-    public Object getPayload() {
-        // TODO coercition to a Java class
-        return dv.getValue().getValue();
+    public Optional<Object> getPayload() {
+        // TODO coercion to a Java class?
+        if (dv == null) return Optional.empty();
+        else return Optional.of(dv.getValue().getValue());
     }
 
     @Override
