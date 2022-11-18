@@ -12,10 +12,7 @@ import org.eclipse.milo.opcua.stack.core.types.structured.EndpointDescription;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
 
@@ -48,6 +45,14 @@ public class OpcUaBinding extends BaseProtocolBinding {
     @Override
     public String getProtocol() {
         return OPC_UA_PROTOCOL;
+    }
+
+    @Override
+    public Collection<String> getSupportedSchemes() {
+        Set<String> singleton = new HashSet<>();
+        singleton.add(OPC_UA_SCHEME);
+
+        return singleton;
     }
 
     @Override
