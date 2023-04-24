@@ -43,32 +43,41 @@ public class WriteOperation extends OpcUaOperation {
 
     @Override
     protected void setObjectPayload(Map<String, Object> payload) {
-        dv = new DataValue(new Variant(payload));
+        setAnyPayload(payload);
     }
 
     @Override
     protected void setArrayPayload(List<Object> payload) {
-        dv = new DataValue(new Variant(payload));
+        setAnyPayload(payload);
     }
 
     @Override
     protected void setStringPayload(String payload) {
-        dv = new DataValue(new Variant(payload));
+        setAnyPayload(payload);
     }
 
     @Override
     protected void setBooleanPayload(Boolean payload) {
-        dv = new DataValue(new Variant(payload));
+        setAnyPayload(payload);
     }
 
     @Override
     protected void setIntegerPayload(Long payload) {
-        dv = new DataValue(new Variant(payload));
+        setAnyPayload(payload);
     }
 
     @Override
     protected void setNumberPayload(Double payload) {
-        dv = new DataValue(new Variant(payload));
+        setAnyPayload(payload);
+    }
+
+    /**
+     * Set the OPC UA request payload from any JSON value.
+     *
+     * @param payload some JSON value
+     */
+    private void setAnyPayload(Object payload) {
+        dv = new DataValue(new Variant(payload), null, null);
     }
 
 }

@@ -23,7 +23,7 @@ public class OpcUaBindingTest {
 
     @BeforeAll
     static void init() {
-        ProtocolBindings.registerBinding(OpcUaBinding.OPC_UA_SCHEME, OpcUaBinding.class.getName());
+        ProtocolBindings.registerBinding(OpcUaBinding.class.getName());
     }
 
     @Test
