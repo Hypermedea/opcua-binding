@@ -1,17 +1,24 @@
 package org.hypermedea.opcua;
 
-import ch.unisg.ics.interactions.wot.td.affordances.Form;
-import ch.unisg.ics.interactions.wot.td.bindings.Operation;
-import ch.unisg.ics.interactions.wot.td.bindings.ProtocolBindings;
-import ch.unisg.ics.interactions.wot.td.bindings.Response;
-import ch.unisg.ics.interactions.wot.td.schemas.IntegerSchema;
-import ch.unisg.ics.interactions.wot.td.vocabularies.TD;
-import org.junit.jupiter.api.BeforeAll;
+import jason.asSyntax.Literal;
+import jason.asSyntax.NumberTerm;
+import org.apache.jena.vocabulary.RDF;
+import org.hypermedea.ct.RepresentationHandlers;
+import org.hypermedea.op.Operation;
+import org.hypermedea.op.ProtocolBindings;
+import org.hypermedea.op.Response;
 import org.junit.jupiter.api.Test;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 
 public class OpcUaBindingTest {
 
@@ -21,35 +28,39 @@ public class OpcUaBindingTest {
 
     public static final String VARIABLE_TO_WRITE = "ns=2;i=34"; // any integer is recognized by the server
 
-    @BeforeAll
-    static void init() {
-        ProtocolBindings.registerBinding(OpcUaBinding.class.getName());
-    }
-
     @Test
     void testReadProperty() throws IOException {
-        Form f = new Form.Builder(OPC_UA_ENDPOINT)
-                .addOperationType(TD.readProperty)
-                .addProperty(OPCUA.nodeId, VARIABLE_TO_READ)
-                .build();
+        Map<String, Object> f = new HashMap<>();
+        f.put(Operation.METHOD_NAME_FIELD, Operation.GET);
+        f.put(OPCUA.nodeId, VARIABLE_TO_READ);
 
-        Operation op = ProtocolBindings.getBinding(f).bind(f, TD.readProperty);
+        Operation op = ProtocolBindings.bind(OPC_UA_ENDPOINT, f);
         op.sendRequest();
         Response res = op.getResponse();
 
         assertEquals(Response.ResponseStatus.OK, res.getStatus());
-        assertInstanceOf(Integer.class, res.getPayload().get());
+
+        assertEquals(1, res.getPayload().size());
+
+        Literal dv = res.getPayload().stream().findFirst().get();
+
+        assertEquals("rdf", dv.getFunctor());
+        assertInstanceOf(NumberTerm.class, dv.getTerm(2));
     }
 
     @Test
     void testWriteProperty() throws IOException {
-        Form f = new Form.Builder(OPC_UA_ENDPOINT)
-                .addOperationType(TD.writeProperty)
-                .addProperty(OPCUA.nodeId, VARIABLE_TO_WRITE)
-                .build();
+        Map<String, Object> f = new HashMap<>();
+        f.put(Operation.METHOD_NAME_FIELD, Operation.PUT);
+        f.put(OPCUA.nodeId, VARIABLE_TO_WRITE);
 
-        Operation op = ProtocolBindings.getBinding(f).bind(f, TD.writeProperty);
-        op.setPayload(new IntegerSchema.Builder().build(), 234);
+        Operation op = ProtocolBindings.bind(OPC_UA_ENDPOINT, f);
+
+        String t = String.format("<%s> <%s> 234 .", OPC_UA_ENDPOINT, RDF.value.getURI());
+        InputStream in = new ByteArrayInputStream(t.getBytes(StandardCharsets.UTF_8));
+        Collection<Literal> payload = RepresentationHandlers.deserialize(in, OPC_UA_ENDPOINT, "text/turtle");
+        op.setPayload(payload);
+        
         op.sendRequest();
         Response res = op.getResponse();
 

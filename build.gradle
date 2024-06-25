@@ -3,19 +3,32 @@ plugins {
 }
 
 group 'org.hypermedea'
-version '0.1'
+version '0.2'
+
+java {
+    toolchain {
+        // ensures compatibility with JaCaMo 1.2
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
 
 repositories {
     mavenCentral()
-    maven { url 'https://jitpack.io' }
+    maven { url 'https://repo.gradle.org/gradle/libs-releases' }
+    maven { url 'https://raw.github.com/jacamo-lang/mvn-repo/master' }
+    maven { url 'https://hypermedea.github.io/maven' }
+    mavenLocal()
 }
 
 dependencies {
     implementation 'org.eclipse.milo:sdk-client:0.6.8'
+    implementation 'org.apache.jena:jena-core:3.16.0'
 
-    // do not export wot-td-java with the library (which should already be included in the end-user application)
-    compileOnly 'com.github.Hypermedea:wot-td-java:ca73f81'
-    testImplementation 'com.github.Hypermedea:wot-td-java:ca73f81'
+    compileOnly 'org.jacamo:jacamo:1.2'
+    testImplementation 'org.jacamo:jacamo:1.2'
+
+    compileOnly 'org.hypermedea:hypermedea:0.4.1'
+    testImplementation 'org.hypermedea:hypermedea:0.4.1'
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
@@ -25,13 +38,3 @@ test {
     useJUnitPlatform()
 }
 
-//jar {
-//    manifest {
-//        attributes 'Implementation-Title': 'OPC UA Binding for W3C WoT',
-//                'Implementation-Version': version,
-//                'Built-By': 'Victor Charpenay'
-//    }
-//
-//    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
-//    from { configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) } }
-//}

@@ -1,28 +1,43 @@
 package org.hypermedea.opcua;
 
-import ch.unisg.ics.interactions.wot.td.affordances.Link;
-import ch.unisg.ics.interactions.wot.td.bindings.Response;
+import jason.asSyntax.Literal;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.jena.vocabulary.RDF;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.StatusCode;
+import org.hypermedea.ct.RepresentationHandlers;
+import org.hypermedea.op.BaseResponse;
+import org.hypermedea.op.Operation;
+import org.hypermedea.op.Response;
 
-import java.util.ArrayList;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 
-public class OpcUaResponse implements Response {
+public class OpcUaResponse extends BaseResponse {
 
     private final ResponseStatus status;
 
-    private final DataValue dv;
+    private final Optional<DataValue> dvOpt;
 
-    public OpcUaResponse(StatusCode opcUaStatus) {
+    public OpcUaResponse(Operation op, StatusCode opcUaStatus) {
+        super(op);
+
         this.status = getResponseStatus(opcUaStatus);
-        this.dv = null;
+        this.dvOpt = Optional.empty();
     }
 
-    public OpcUaResponse(DataValue dv) {
+    public OpcUaResponse(Operation op, DataValue dv) {
+        super(op);
+
         this.status = getResponseStatus(dv.getStatusCode());
-        this.dv = dv;
+        this.dvOpt = Optional.of(dv);
     }
 
     @Override
@@ -31,21 +46,31 @@ public class OpcUaResponse implements Response {
     }
 
     @Override
-    public Optional<Object> getPayload() {
-        // TODO coercion to a Java class?
-        if (dv == null) return Optional.empty();
-        else return Optional.of(dv.getValue().getValue());
-    }
+    public Collection<Literal> getPayload() {
+        Model singleton = ModelFactory.createDefaultModel();
 
-    @Override
-    public Collection<Link> getLinks() {
-        return new ArrayList<>();
+        if (dvOpt.isEmpty()) return List.of();
+
+        try {
+            Resource res = ResourceFactory.createResource(operation.getTargetURI());
+            singleton.add(res, RDF.value, DataValueConverter.asLiteral(dvOpt.get()));
+
+            ByteArrayOutputStream out = new ByteArrayOutputStream();
+            singleton.write(out, "N-TRIPLES", operation.getTargetURI());
+
+            ByteArrayInputStream in = new ByteArrayInputStream(out.toByteArray());
+            return RepresentationHandlers.deserialize(in, operation.getTargetURI(), "text/turtle");
+        } catch (IOException e) {
+            // TODO improve log
+            e.printStackTrace();
+            return List.of();
+        }
     }
 
     private ResponseStatus getResponseStatus(StatusCode opcUaStatus) {
-        // TODO is bad may mean that the request was incorrect
         if (opcUaStatus.isGood()) return Response.ResponseStatus.OK;
-        else if (opcUaStatus.isBad()) return Response.ResponseStatus.THING_ERROR;
+        // TODO is bad may mean that the request was incorrect
+        else if (opcUaStatus.isBad()) return ResponseStatus.SERVER_ERROR;
         else return Response.ResponseStatus.UNKNOWN_ERROR;
     }
 
