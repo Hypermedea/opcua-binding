@@ -18,7 +18,7 @@ package org.hypermedea.opcua;
  */
 public class OPCUA {
 
-    public static final String NS = "http://opcfoundation.org/UA/";
+    public static final String NS = "urn:hypermedea:opcua:";
 
     /**
      * <p>

@@ -1,9 +1,10 @@
 plugins {
     id 'java-library'
+    id 'maven-publish'
 }
 
 group 'org.hypermedea'
-version '0.2'
+version '0.4.2'
 
 java {
     toolchain {
@@ -36,5 +37,25 @@ dependencies {
 
 test {
     useJUnitPlatform()
+}
+
+publishing {
+    publications {
+        rosBinding(MavenPublication) {
+            groupId = group
+            artifactId = 'opcua-binding'
+            version = version
+
+            from components.java
+        }
+    }
+
+    repositories {
+        maven {
+            name = 'Hypermedea'
+            // assumes the hypermedea.github.io repo is cloned next to this repo
+            url = "../hypermedea.github.io/maven"
+        }
+    }
 }
 

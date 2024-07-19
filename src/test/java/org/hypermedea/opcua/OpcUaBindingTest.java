@@ -32,9 +32,8 @@ public class OpcUaBindingTest {
     void testReadProperty() throws IOException {
         Map<String, Object> f = new HashMap<>();
         f.put(Operation.METHOD_NAME_FIELD, Operation.GET);
-        f.put(OPCUA.nodeId, VARIABLE_TO_READ);
 
-        Operation op = ProtocolBindings.bind(OPC_UA_ENDPOINT, f);
+        Operation op = ProtocolBindings.bind(getTarget(OPC_UA_ENDPOINT, VARIABLE_TO_READ), f);
         op.sendRequest();
         Response res = op.getResponse();
 
@@ -54,9 +53,10 @@ public class OpcUaBindingTest {
         f.put(Operation.METHOD_NAME_FIELD, Operation.PUT);
         f.put(OPCUA.nodeId, VARIABLE_TO_WRITE);
 
-        Operation op = ProtocolBindings.bind(OPC_UA_ENDPOINT, f);
+        String target = getTarget(OPC_UA_ENDPOINT, VARIABLE_TO_WRITE);
+        Operation op = ProtocolBindings.bind(target, f);
 
-        String t = String.format("<%s> <%s> 234 .", OPC_UA_ENDPOINT, RDF.value.getURI());
+        String t = String.format("<%s> <%s> 234 .", target, RDF.value.getURI());
         InputStream in = new ByteArrayInputStream(t.getBytes(StandardCharsets.UTF_8));
         Collection<Literal> payload = RepresentationHandlers.deserialize(in, OPC_UA_ENDPOINT, "text/turtle");
         op.setPayload(payload);
@@ -65,6 +65,10 @@ public class OpcUaBindingTest {
         Response res = op.getResponse();
 
         assertEquals(Response.ResponseStatus.OK, res.getStatus());
+    }
+
+    private String getTarget(String endpoint, String nodeId) {
+        return String.format("%s?nodeId=%s", endpoint, nodeId);
     }
 
 }

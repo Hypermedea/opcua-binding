@@ -9,6 +9,8 @@ import org.eclipse.milo.opcua.stack.core.types.structured.EndpointDescription;
 import org.hypermedea.op.BaseProtocolBinding;
 import org.hypermedea.op.Operation;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Function;
@@ -74,28 +76,30 @@ public class OpcUaBinding extends BaseProtocolBinding {
      *     contains invalid information (e.g. incorrect endpoint URI).
      * </p>
      *
-     * @param endpointUri an endpoint URI targeting some OPC UA server
+     * @param resUri the URI targeting some OPC UA variable
      * @return a client connected to the targeted OPC UA server
      */
-    private OpcUaClient getClient(String endpointUri) {
-        // TODO check client is still connected
-        if (connections.containsKey(endpointUri)) return connections.get(endpointUri);
-
-        Function<List<EndpointDescription>, Optional<EndpointDescription>> sel = eps -> eps.stream().findFirst();
-
-        Function<OpcUaClientConfigBuilder, OpcUaClientConfig> build = b ->
-                b.setApplicationName(LocalizedText.english("Hypermedea OPC UA protocol binding"))
-                 .setApplicationUri("https://hypermedea.github.io/#this")
-                 .build();
-
+    private OpcUaClient getClient(String resUri) {
         try {
-            OpcUaClient client = create(endpointUri, sel, build);
-            client.connect().get(); // blocking operation
+            String endpointUri = getEndpoint(resUri);
 
-            connections.put(endpointUri, client);
+            // TODO check client is still connected
+            if (connections.containsKey(endpointUri)) return connections.get(endpointUri);
 
-            return client;
-        } catch (UaException e) {
+            Function<List<EndpointDescription>, Optional<EndpointDescription>> sel = eps -> eps.stream().findFirst();
+
+            Function<OpcUaClientConfigBuilder, OpcUaClientConfig> build = b ->
+                    b.setApplicationName(LocalizedText.english("Hypermedea OPC UA protocol binding"))
+                     .setApplicationUri("https://hypermedea.github.io/#this")
+                     .build();
+
+                OpcUaClient client = create(endpointUri, sel, build);
+                client.connect().get(); // blocking operation
+
+                connections.put(endpointUri, client);
+
+                return client;
+        } catch (UaException | URISyntaxException e) {
             throw new RuntimeException("OPC UA client cannot be created based on form information", e);
         } catch (InterruptedException e) {
             // TODO retry instead
@@ -104,6 +108,13 @@ public class OpcUaBinding extends BaseProtocolBinding {
             // TODO log and retry instead
             throw new RuntimeException(e);
         }
+    }
+
+    private String getEndpoint(String uri) throws URISyntaxException {
+        URI x = new URI(uri);
+        URI y = new URI(x.getScheme(), x.getUserInfo(), x.getHost(), x.getPort(), x.getPath(), null, null);
+
+        return y.toString();
     }
 
 }
