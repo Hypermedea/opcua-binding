@@ -8,6 +8,9 @@ import org.eclipse.milo.opcua.stack.core.BuiltinDataType;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
 import org.eclipse.milo.opcua.stack.core.types.builtin.ExpandedNodeId;
 import org.eclipse.milo.opcua.stack.core.types.builtin.Variant;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UInteger;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.ULong;
+import org.eclipse.milo.opcua.stack.core.types.builtin.unsigned.UShort;
 
 import java.util.Optional;
 
@@ -21,14 +24,12 @@ public class DataValueConverter {
     }
 
     public static DataValue asDataValue(Literal l) {
-        Variant v = new Variant(l.asLiteral().getValue());
-        // TODO inverse function to getDatatype()
-        return DataValue.valueOnly(v);
+        return asDataValue(l, null);
     }
 
     public static DataValue asDataValue(Literal l, String datatype) {
-        return asDataValue(l);
-        // TODO cast if possible
+        Variant v = new Variant(getValue(l, datatype));
+        return DataValue.valueOnly(v);
     }
 
     private static RDFDatatype getDatatype(Variant var) {
@@ -55,6 +56,35 @@ public class DataValueConverter {
         if (dt.equalTo(BuiltinDataType.DateTime.getNodeId())) return XSDDatatype.XSDdateTime;
 
         return XSDDatatype.XSDstring;
+    }
+
+    private static Object getValue(Literal l, String datatype) {
+        if (datatype == null) return l.getValue();
+
+        String lex = l.getLexicalForm();
+
+        switch (datatype) {
+            case OPCUA.Boolean: return Boolean.valueOf(lex);
+
+            // FIXME SByte != Byte
+            case OPCUA.SByte: return Byte.valueOf(l.getLexicalForm());
+            case OPCUA.Int16: return Short.valueOf(l.getLexicalForm());
+            case OPCUA.Int32: return Integer.valueOf(l.getLexicalForm());
+            case OPCUA.Int64: return Long.valueOf(l.getLexicalForm());
+
+            case OPCUA.Byte: return Byte.valueOf(lex);
+            case OPCUA.UInt16: return UShort.valueOf(lex);
+            case OPCUA.UInt32: return UInteger.valueOf(lex);
+            case OPCUA.UInt64: return ULong.valueOf(lex);
+
+            case OPCUA.Float: return Float.valueOf(lex);
+            case OPCUA.Double: return Double.valueOf(lex);
+
+            // TODO
+            // case OPCUA.DateTime: return new DateTime(new Date(lex));
+
+            default: return lex;
+        }
     }
 
 }

@@ -41,7 +41,7 @@ test {
 
 publishing {
     publications {
-        rosBinding(MavenPublication) {
+        opcUABinding(MavenPublication) {
             groupId = group
             artifactId = 'opcua-binding'
             version = version

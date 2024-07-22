@@ -61,6 +61,8 @@ public class OPCUA {
 
     public static final String Int32 = NS + "Int32";
 
+    public static final String Int64 = NS + "Int64";
+
     public static final String LocalizedText = NS + "LocalizedString";
 
     public static final String SByte = NS + "SByte";
@@ -72,5 +74,7 @@ public class OPCUA {
     public static final String UInt32 = NS + "UInt32";
 
     public static final String UInt64 = NS + "UInt64";
+
+    public static final String DateTime = NS + "DateTime";
 
 }

@@ -1,9 +1,6 @@
 package org.hypermedea.opcua;
 
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.NodeIterator;
-import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.*;
 import org.apache.jena.vocabulary.RDF;
 import org.eclipse.milo.opcua.sdk.client.OpcUaClient;
 import org.eclipse.milo.opcua.stack.core.types.builtin.DataValue;
@@ -52,12 +49,19 @@ public class WriteOperation extends OpcUaOperation {
         if (!it.hasNext())
             throw new InvalidFormException("The provided payload should include at least one rdf:value statement");
 
-        RDFNode l = it.next();
+        RDFNode n = it.next();
 
-        if (!l.isLiteral())
+        if (!n.isLiteral())
             throw new InvalidFormException("The rdf:value provided in the payload should be a literal");
 
-        return DataValueConverter.asDataValue(l.asLiteral());
+        Literal l = n.asLiteral();
+
+        if (form.containsKey(OPCUA.datatype)) {
+            String dt = (String) form.get(OPCUA.datatype);
+            return DataValueConverter.asDataValue(l, dt);
+        } else {
+            return DataValueConverter.asDataValue(l);
+        }
     }
 
 }
